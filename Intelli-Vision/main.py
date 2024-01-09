@@ -9,6 +9,7 @@ from distance_utils import *
 from gps_utils import *
 from database_utils import *
 import threading
+from messanger import *
 
 normalSize = (640, 480)
 lowresSize = (320, 240)
@@ -164,7 +165,7 @@ def capture_and_process():
             if alert_str:
                 # Send notification to Telegram
                 send_alert_notification(json_response["Alert"], json_response["latitude"], json_response["longitude"], json_response["image_path"])
-                
+
             previous_dist = distance
             # Wait for 5 seconds before capturing the next image
             time.sleep(5)
