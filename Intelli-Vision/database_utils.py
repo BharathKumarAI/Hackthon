@@ -2,6 +2,7 @@ import sqlite3
 import json
 from pathlib import Path
 from datetime import datetime
+from collections import Counter
 
 def create_database():
     # Connect to SQLite database (create if not exists)
@@ -31,13 +32,13 @@ def save_to_database(json_response):
     conn = sqlite3.connect('guidinglight.db')
 
     # Define the keys you expect in the JSON response
-    expected_keys = ["Mode", "Alert", "Description", "Objects", "Distance", "latitude", "longitude", "Image_path"]
+    expected_keys = ["Mode", "Alert", "Description", "Objects", "Distance", "latitude", "longitude", "image_path"]
 
     # Replace "None" with an empty string for the "Alert" key
     json_response["Alert"] = json_response.get("Alert", "")
     if json_response["Alert"] == "None":
         json_response["Alert"] = ""
-        
+
     # Fill missing keys with empty values
     for key in expected_keys:
         if key not in json_response:
@@ -55,7 +56,7 @@ def save_to_database(json_response):
         json_response["Distance"],
         json_response["latitude"],
         json_response["longitude"],
-        json_response["Image_path"]
+        json_response["image_path"]
     )
 
     # Insert data into the table

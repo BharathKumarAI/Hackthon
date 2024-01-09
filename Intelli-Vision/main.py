@@ -82,8 +82,10 @@ def capture_and_process():
                 # Send image for prediction using LLM model
                 response = send_images_for_prediction(image, distance)
                 json_response = json.loads(response)
-                alert = json_response['Alert']
-                if alert.lower() != "none" and alert != "":
+                alert_str = json_response['Alert']
+                if alert_str.lower() == "none":
+                    alert_str = ""
+                if alert_str.lower() != "none" and alert_str != "":
                     text_to_speech(json_response['Description'])
                 json_response["Distance"] = distance
                 json_response["latitude"] = current_latitude
@@ -159,6 +161,10 @@ def capture_and_process():
             # Save the captured image with timestamp
             cv2.imwrite(image_path, image)
             save_to_database(json_response)
+            if alert_str:
+                # Send notification to Telegram
+                send_alert_notification(json_response["Alert"], json_response["latitude"], json_response["longitude"], json_response["image_path"])
+                
             previous_dist = distance
             # Wait for 5 seconds before capturing the next image
             time.sleep(5)

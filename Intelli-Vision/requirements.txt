@@ -12,3 +12,4 @@ google-cloud-aiplatform
 tflite-runtime
 python-dotenv
 geocoder
+python-telegram-bot
