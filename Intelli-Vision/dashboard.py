@@ -32,7 +32,6 @@ def get_closest_landmark(latitude, longitude, api_key, landmark_type):
         return None
 
 # Function to create a Streamlit dashboard
-# Function to create a Streamlit dashboard
 def main():
     st.set_page_config(layout="wide")
     st.title("Intelli-Vision Dashboard")
@@ -42,9 +41,6 @@ def main():
     g = geocoder.ip('me')
     loc = g.latlng
     lat, lng = loc[0], loc[1]
-
-    # # Replace with your actual Google Maps API key
-    # api_key = "YOUR_GOOGLE_MAPS_API_KEY"
 
     # Landmark types for dropdown
     landmark_types = ["school", "hospital", "restaurant", "park", "airport",
@@ -75,9 +71,20 @@ def main():
     events_df = pd.read_sql_query(query, conn)
     conn.close()
 
-    # Display events table
-    st.subheader("Events Table")
-    st.table(events_df)
+    # Create subtabs for "Events" and "Alerts"
+    sub1, sub2 = st.tabs(["Events", "Alerts"])
+
+    # Events Tab
+    with sub1:
+        st.subheader("Events Tab")
+        st.table(events_df)
+
+    # Alerts Tab
+    with sub2:
+        st.subheader("Alerts Tab")
+        # Filter data based on non-empty or "None" values in the "Alert" column
+        alerts_df = events_df[events_df["alert"].notnull() & (events_df["alert"] != "None") &  (events_df["alert"] != "")]
+        st.table(alerts_df)
 
 if __name__ == "__main__":
     main()
