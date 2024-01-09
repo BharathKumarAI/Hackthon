@@ -33,6 +33,11 @@ def save_to_database(json_response):
     # Define the keys you expect in the JSON response
     expected_keys = ["Mode", "Alert", "Description", "Objects", "Distance", "latitude", "longitude", "Image_path"]
 
+    # Replace "None" with an empty string for the "Alert" key
+    json_response["Alert"] = json_response.get("Alert", "")
+    if json_response["Alert"] == "None":
+        json_response["Alert"] = ""
+        
     # Fill missing keys with empty values
     for key in expected_keys:
         if key not in json_response:
@@ -60,7 +65,7 @@ def save_to_database(json_response):
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         ''', data_tuple)
     conn.close()
-    
+
 # Function to retrieve the last entries from the database
 def get_last_entries(limit=5):
     # Connect to SQLite database (create if not exists)
