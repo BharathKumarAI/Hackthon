@@ -23,6 +23,7 @@ video_dir = os.path.join(
 )
 print(video_dir)
 
+
 class SaveVideoProcessor(VideoProcessorBase):
     def __init__(self, filepath):
         self.filepath = filepath
@@ -69,8 +70,9 @@ def app():
             video_dir,
             f"uploaded_{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}.mp4",
         )
-
-        st.sidebar.write(f"Saving to: {save_path}")
+        with open(save_path, "wb") as f:
+            f.write(uploaded_file.getbuffer())
+        st.sidebar.write(f"Saved to: {save_path}")
 
     # else:
     #     st.warning("Please upload a video file in the sidebar.")
