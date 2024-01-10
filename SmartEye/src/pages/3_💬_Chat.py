@@ -77,7 +77,7 @@ for msg in st.session_state.history:
         st.markdown(msg["content"])
 
 
-prompt = st.chat_input("What is it you are looking for")
+prompt = st.chat_input("Post your query")
 if prompt:
     st.session_state.history.append({"role": "user", "content": prompt})
 
