@@ -1,5 +1,6 @@
 import streamlit as st
 
+st.set_page_config(layout="wide")
 st.title("Smart Eye - Redefining Surveillance")
 
 # Create tabs

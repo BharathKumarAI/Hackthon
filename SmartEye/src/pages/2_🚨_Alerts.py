@@ -1,13 +1,23 @@
+import os
 import streamlit as st
 import sqlite3
 import pandas as pd
 import matplotlib.pyplot as plt
 import plotly.express as px
 
+st.set_page_config(layout="wide")
+current_dir = os.path.dirname(os.path.abspath(__file__))
+PARENT_dIR = os.path.abspath(
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), os.pardir)
+)
+ROOT_DIR = os.path.abspath(os.path.join(PARENT_dIR, os.pardir))
+db_path = os.path.join(ROOT_DIR, "current_alerts.db")
+hist_db_path = os.path.join(ROOT_DIR, "smarteye.db")
+
 
 # Function to create databases and tables
 def create_current_database():
-    conn = sqlite3.connect("current_alerts.db")
+    conn = sqlite3.connect(db_path)
     c = conn.cursor()
     c.execute(
         """CREATE TABLE IF NOT EXISTS current_alerts
@@ -20,7 +30,7 @@ def create_current_database():
 
 # Function to create history database
 def create_history_database():
-    conn = sqlite3.connect("alert_history.db")
+    conn = sqlite3.connect(hist_db_path)
     c = conn.cursor()
     c.execute(
         """CREATE TABLE IF NOT EXISTS alert_history
@@ -34,7 +44,7 @@ def create_history_database():
 # Function to add a new alert to the current alerts database
 def add_current_alert(alert_name, alert_description, alert_type="Default"):
     if alert_name and alert_description:
-        conn = sqlite3.connect("current_alerts.db")
+        conn = sqlite3.connect(db_path)
         c = conn.cursor()
         c.execute(
             "INSERT INTO current_alerts (Name, Description, Type) VALUES (?, ?, ?)",
@@ -46,37 +56,9 @@ def add_current_alert(alert_name, alert_description, alert_type="Default"):
         st.sidebar.warning("Name/Description is not defined")
 
 
-# Function to move an alert to the alert history database
-def move_to_history(alert_id):
-    conn_current = sqlite3.connect("current_alerts.db")
-    conn_history = sqlite3.connect("alert_history.db")
-
-    c_current = conn_current.cursor()
-    c_history = conn_history.cursor()
-
-    # Retrieve alert details from current alerts database
-    c_current.execute(
-        "SELECT Name, Description FROM current_alerts WHERE id = ?", (alert_id,)
-    )
-    alert_details = c_current.fetchone()
-
-    # Insert the alert details into alert history database
-    c_history.execute(
-        "INSERT INTO alert_history (Name, Description) VALUES (?, ?)", alert_details
-    )
-    conn_history.commit()
-
-    # Delete the alert from current alerts database
-    c_current.execute("DELETE FROM current_alerts WHERE id = ?", (alert_id,))
-    conn_current.commit()
-
-    conn_current.close()
-    conn_history.close()
-
-
 # Function to get all current alerts from the current alerts database as a DataFrame
 def get_current_alerts():
-    conn = sqlite3.connect("current_alerts.db")
+    conn = sqlite3.connect(db_path)
     query = "SELECT * FROM current_alerts ORDER BY Timestamp DESC"
     df = pd.read_sql_query(query, conn)
     conn.close()
@@ -85,8 +67,8 @@ def get_current_alerts():
 
 # Function to get all alert history from the alert history database as a DataFrame
 def get_alert_history():
-    conn = sqlite3.connect("alert_history.db")
-    query = "SELECT * FROM alert_history ORDER BY Timestamp DESC"
+    conn = sqlite3.connect(hist_db_path)
+    query = "SELECT * FROM smarteye where AlertName != '' ORDER BY Timestamp DESC"
     df = pd.read_sql_query(query, conn)
     conn.close()
     return df
@@ -94,7 +76,7 @@ def get_alert_history():
 
 # Function to deactivate alerts
 def deactivate_selected_alerts(alert_ids):
-    conn = sqlite3.connect("current_alerts.db")
+    conn = sqlite3.connect(db_path)
     c = conn.cursor()
     for alert_id in alert_ids:
         c.execute("UPDATE current_alerts SET Active = 0 WHERE id = ?", (alert_id,))
@@ -104,7 +86,7 @@ def deactivate_selected_alerts(alert_ids):
 
 # Function to reactivate alerts
 def reactivate_selected_alerts(alert_ids):
-    conn = sqlite3.connect("current_alerts.db")
+    conn = sqlite3.connect(db_path)
     c = conn.cursor()
     for alert_id in alert_ids:
         c.execute("UPDATE current_alerts SET Active = 1 WHERE id = ?", (alert_id,))
@@ -114,14 +96,14 @@ def reactivate_selected_alerts(alert_ids):
 
 # Function to plot an interactive pie chart of active alerts using Plotly
 def plot_pie_chart(df):
-    if not df.empty and "Name" in df.columns:
-        active_df = df[df["Active"] == 1]
+    if not df.empty and "AlertName" in df.columns:
+        # active_df = df[df["Active"] == 1]
 
         fig = px.pie(
-            active_df,
-            names="Name",
+            df,
+            names="AlertName",
             title="Active Alerts Distribution",
-            labels={"Name": "Alert Name"},
+            labels={"AlertName": "Alert Name"},
             hole=0.3,
         )
 
@@ -215,7 +197,7 @@ def main():
 
         # Display interactive pie chart of active alerts
         st.header("Active Alerts Distribution")
-        plot_pie_chart(current_alerts_df)
+        plot_pie_chart(get_alert_history())
     else:
         st.warning("No current alerts.")
 

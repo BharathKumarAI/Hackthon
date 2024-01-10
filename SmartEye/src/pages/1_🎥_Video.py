@@ -10,6 +10,8 @@ from streamlit_webrtc import (
     webrtc_streamer,
 )
 
+st.set_page_config(layout="wide")
+
 # Get the directory of the current script or module
 current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.abspath(
@@ -20,7 +22,6 @@ video_dir = os.path.join(
     os.path.abspath(os.path.join(parent_dir, os.pardir)), "captured", "video"
 )
 print(video_dir)
-
 
 class SaveVideoProcessor(VideoProcessorBase):
     def __init__(self, filepath):

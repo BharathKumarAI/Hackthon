@@ -16,3 +16,4 @@ chromadb
 tiktoken
 python-dotenv
 python-telegram-bot
+moviepy
